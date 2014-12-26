@@ -5,5 +5,5 @@ vim-pbcopy
 
 suuport mac clipboard for vim
 
-### USE
+### USAGE
 `<Leader> c` save to mac system clipboard
