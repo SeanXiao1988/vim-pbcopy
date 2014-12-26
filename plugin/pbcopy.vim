@@ -6,25 +6,21 @@
 " @date 2014-12-26
 "
 
-" For more infomation, use ":help pbcopy" command
-
 if exists('g:clipBoardCopy_loaded')
 	finish
 endif
 let g:clipBoardCopy_loaded = 1
 
-if !executable('pbcopy') || !executable('textutil')
+if !executable('pbcopy')
 	echomsg 'cannot load clipboard copy content, not on a mac ?'
 	finish
 endif
 
 " Key Mapping
-vmap <Plug>ClipBoardCopyPlug :call <SID>ClipBoardCopy()
-if (!hasmapto( '<Plug>ClipBoardCopyPlug', 'v'))
-	vmap <leader>c <Plug>ClipBoardCopyPlug<CR>
-endif
+nmap <Localleader>c :call <SID>Copy('n')<CR>
+vmap <Localleader>c :call <SID>Copy('v')<CR>
 
-function! s:getVisualSelection()
+function! s:GetVisualSelection()
 	let [lnum1, col1] = getpos("'<")[1:2]
 	let [lnum2, col2] = getpos("'>")[1:2]
 	let lines = getline(lnum1, lnum2)
@@ -33,8 +29,19 @@ function! s:getVisualSelection()
 	return join(lines, '\\n')
 endfunction
 
-function! <SID>ClipBoardCopy()
-	let s:copyStr = s:getVisualSelection()
+function! s:GetNormalCursorWord()
+	return expand("<cword>")
+endfunction
+
+function! <SID>Copy(mode)
+	let s:copyStr = ''
+	if (a:mode == 'n')
+		" normal mode call
+		let s:copyStr = s:GetNormalCursorWord()
+	else
+		" visual mode call
+		let s:copyStr = s:GetVisualSelection()
+	endif
 	exe 'silent !echo -n ' . s:copyStr . ' | ' . 'pbcopy'
 	redraw!
 endfunction
