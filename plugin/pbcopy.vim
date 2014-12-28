@@ -17,16 +17,22 @@ if !executable('pbcopy')
 endif
 
 " Key Mapping
-nmap <Localleader>c :call <SID>Copy('n')<CR>
-vmap <Localleader>c :call <SID>Copy('v')<CR>
+nmap <leader>c :call <SID>Copy('n')<CR>
+vmap <leader>c :call <SID>Copy('v')<CR>
 
 function! s:GetVisualSelection()
-	let [lnum1, col1] = getpos("'<")[1:2]
-	let [lnum2, col2] = getpos("'>")[1:2]
-	let lines = getline(lnum1, lnum2)
-	let lines[-1] = lines[-1][:col2 - (&selection == 'inclusive' ? 1 : 2)]
-	let lines[0] = lines[0][col1 - 1:]
-	return join(lines, '\\n')
+	" new version for visual selection
+	let a_save = @a
+	normal! gv"ay
+	return shellescape(escape(join(split(@a, "\n"), "\n"), '\'), 1)
+
+	" old version for visual selection
+	"let [lnum1, col1] = getpos("'<")[1:2]
+	"let [lnum2, col2] = getpos("'>")[1:2]
+	"let lines = getline(lnum1, lnum2)
+	"let lines[-1] = lines[-1][:col2 - (&selection == 'inclusive' ? 1 : 2)]
+	"let lines[0] = lines[0][col1 - 1:]
+	"return  join(lines, '\\n')
 endfunction
 
 function! s:GetNormalCursorWord()
@@ -42,6 +48,6 @@ function! <SID>Copy(mode)
 		" visual mode call
 		let s:copyStr = s:GetVisualSelection()
 	endif
-	exe 'silent !echo -n ' . s:copyStr . ' | ' . 'pbcopy'
+	exe "silent !echo -n " . s:copyStr . " | " . "pbcopy"
 	redraw!
 endfunction
