@@ -5,7 +5,6 @@
 " @version 1.0.0
 " @date 2014-12-26
 "
-
 if exists('g:copyAndGrepMap_loaded')
 	finish
 endif
@@ -22,6 +21,8 @@ if !executable('grep')
 endif
 
 let g:copyAndGrepVar_grepInclude = ["*.vim", "*.lua", "*.md", "*.js", "*.py", "*.h", "*.cpp", "*.m"]
+let s:isCopy = 0
+let s:isGrep = 0
 
 if !exists('g:copyAndGrepMap_copy')
 	let g:copyAndGrepMap_copy = "<leader>c"
@@ -37,19 +38,43 @@ if (!exists('g:copyAndGrepVar_grepInclude')
 	let g:copyAndGrepVar_grepInclude = ['*']
 endif
 
-function! s:_escape(str)
+function! s:_copyEscape(str)
 	return shellescape(escape(join(split(a:str, "\n"), "\n"), '\'), 1)
+endfunction
+
+function! s:_grepEscape(str)
+	if (!empty(a:str) && char2nr(a:str[strlen(a:str) - 1]) == 10)
+		let a:str = strpart(a:str, 0, strlen(a:str) - 1)
+	endif
+	let lst = [ '\', '/', '^', '$' ]
+	let str = a:str
+	if &magic
+		let magicLst = [ '*', '.', '~', '[', ']' ]
+		call extend(lst, magicLst)
+	endif
+	for i in lst
+		let str = escape(str, i)
+	endfor
+	return str
 endfunction
 
 function! s:_getVisualSelection()
 	let a_save = @a
 	normal! gv"ay
-	return s:_escape(@a)
+	if s:isCopy
+		return s:_copyEscape(@a)
+	else
+		return s:_grepEscape(@a)
+	endif
 endfunction
 
 function! s:_getNormalSelection()
 	let @a = expand('<cword>')
-	return s:_escape(@a)
+	if s:isCopy
+		return s:_copyEscape(@a)
+	else
+		return s:_grepEscape(@a)
+	endif
 endfunction
 
 function! s:_getSelectionWithMode(mode)
@@ -71,11 +96,14 @@ function! s:_getGrepCommand(mode)
 	for item in g:copyAndGrepVar_grepInclude
 		let includeStr .= '--include=' . shellescape(item, 1) . ' '
 	endfor
+	"echo copyStr
 	let commandStr = commandStr . "silent grep! -R -i -n " . includeStr . copyStr . ' .'
 	return commandStr
 endfunction
 
 function! <SID>s:Grep(mode)
+	let s:isCopy = 0
+	let s:isGrep = 1
 	let command = s:_getGrepCommand(a:mode)
 	exec command
 	redraw!
@@ -83,6 +111,8 @@ function! <SID>s:Grep(mode)
 endfunction
 
 function! <SID>s:Copy(mode)
+	let s:isCopy = 1
+	let s:isGrep = 0
 	let copyStr = s:_getSelectionWithMode(a:mode)
 	exe "silent !echo -n " . copyStr . " | " . "pbcopy"
 	redraw!
