@@ -1,16 +1,14 @@
 vim-pbcopy
 ==========
 
-### **Vim Plugin For Mac Clipboard**
+### ** clipboard copy and grep **
 
-support mac clipboard for vim
-
-### Default Key Map
+#### Default Key Map
 `<Leader> c` save to mac system clipboard
 
 `<Leader> g` grep in current working copy
 
-### Variable
+#### Variable
 
 * **g:copyAndGrepMap_copy**
 
