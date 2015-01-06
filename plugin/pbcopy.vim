@@ -20,7 +20,6 @@ if !executable('grep')
 	finish
 endif
 
-let g:copyAndGrepVar_grepInclude = ["*.vim", "*.lua", "*.md", "*.js", "*.py", "*.h", "*.cpp", "*.m"]
 let s:isCopy = 0
 let s:isGrep = 0
 
