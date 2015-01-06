@@ -1,7 +1,7 @@
 vim-pbcopy
 ==========
 
-### ** clipboard copy and grep **
+### **clipboard copy and grep**
 
 #### Default Key Map
 `<Leader> c` save to mac system clipboard
