@@ -43,11 +43,11 @@ function! s:_copyEscape(str)
 endfunction
 
 function! s:_grepEscape(str)
-	if (!empty(a:str) && char2nr(a:str[strlen(a:str) - 1]) == 10)
-		let a:str = strpart(a:str, 0, strlen(a:str) - 1)
-	endif
-	let lst = [ '\', '/', '^', '$' ]
 	let str = a:str
+	if (!empty(str) && char2nr(str[strlen(str) - 1]) == 10)
+		let str = strpart(str, 0, strlen(str) - 1)
+	endif
+	let lst = [ '\', '/', '^', '$', '"', "'", '!', '|', ]
 	if &magic
 		let magicLst = [ '*', '.', '~', '[', ']' ]
 		call extend(lst, magicLst)
@@ -55,6 +55,7 @@ function! s:_grepEscape(str)
 	for i in lst
 		let str = escape(str, i)
 	endfor
+	let str = "\"". str ."\""
 	return str
 endfunction
 
@@ -94,9 +95,8 @@ function! s:_getGrepCommand(mode)
 	let commandStr = ''
 
 	for item in g:copyAndGrepVar_grepInclude
-		let includeStr .= '--include=' . shellescape(item, 1) . ' '
+		let includeStr .= '--include=' . "\'" . item . "\'" . ' '
 	endfor
-	"echo copyStr
 	let commandStr = commandStr . "silent grep! -R -i -n " . includeStr . copyStr . ' .'
 	return commandStr
 endfunction
